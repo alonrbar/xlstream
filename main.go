@@ -5,32 +5,50 @@ import (
 	"bufio"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"strings"
 )
 
 func main() {
 	fmt.Print("Hello")
 
-	sheet, err := openFirstSheet("test.xlsx")
+	// Open file stream.
+	filePath := "text.xlsx"
+	f, err := os.Open(filePath)
 	if err != nil {
-		log.Fatalf("openFirstSheet failed: %v", err)
+		log.Fatalf("os.Open(%q) failed: %v", filePath, err)
+	}
+	defer f.Close()
+
+	// Get file size.
+	fi, err := f.Stat()
+	if err != nil {
+		log.Fatalf("f.Stat() failed: %v", err)
 	}
 
+	// Open specific Excel sheet stream.
+	sheetName := "sheet1"
+	sheet, err := openSheet(f, sheetName, fi.Size())
+	if err != nil {
+		log.Fatalf("openSheet(%q) failed: %v", sheetName, err)
+	}
+
+	// Read rows
 	readRows(sheet)
 
 	fmt.Print("Bye")
 }
 
-func openFirstSheet(src string) (*zip.File, error) {
-	zipReader, err := zip.OpenReader(src)
+func openSheet(r io.ReaderAt, sheetName string, zipSize int64) (*zip.File, error) {
+	zr, err := zip.NewReader(r, zipSize)
 	if err != nil {
 		return nil, err
 	}
-	defer zipReader.Close()
 
-	for _, f := range zipReader.File {
-		if strings.HasSuffix(f.Name, "/sheet1.xml") {
+	for _, f := range zr.File {
+		if strings.HasSuffix(f.Name, fmt.Sprintf("/%v.xml", sheetName)) {
 			return f, nil
 		}
 	}
@@ -45,9 +63,11 @@ func readRows(sheet *zip.File) {
 	}
 	defer reader.Close()
 
+	// Two possible APIs for stream-reading an XML.
 	_ = xml.NewDecoder(reader)
 	_ = bufio.NewReader(reader)
 
+	// TODO: Implement readRow using one of the above APIs.
 	for {
 		readRow()
 	}
