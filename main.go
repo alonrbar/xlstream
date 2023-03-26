@@ -42,6 +42,8 @@ func main() {
 }
 
 func openSheet(r io.ReaderAt, sheetName string, zipSize int64) (*zip.File, error) {
+	// Note: To create a ReaderAt interface for reading from GCS see: 
+	// https://github.com/carbocation/genomisc/compare/8c9ef122d6ab47285dd12288bd9adbad1e735edd...4611e6df9ce70ee9967d19f580ce147ab96106c4
 	zr, err := zip.NewReader(r, zipSize)
 	if err != nil {
 		return nil, err
