@@ -76,15 +76,39 @@ func readRows(sheet *zip.File) {
 }
 
 func readRow() {
+	//
+	// Excel worksheet XML structure is as follows:
+	//
+	// <worksheet ...>
+	//   ...
+	//   <sheetData>
+        //     <row r="1">
+        //       <c r="A1" s="1" t="s">
+        //         <v>0</v>
+        //         ...
+        //       </c>
+        //     </row>
+        //     ...
+        //   </sheetData>
+	//   ...
+	//  </worksheet>
+	//
+	// Read more at http://officeopenxml.com/SScontentOverview.php
+	//
+	
+	//
+	// Pseudo code:
+	//
 	// find row start element
-
+	//
 	// for
 	// 	find next element
 	// 	if start column
 	// 		read value
 	// 		continue
 	//	if end row
-	//		return
-	//  if end of file
-	//  	return
+	//		return	
+	//  	if end of file
+	//  		return
+	//
 }
